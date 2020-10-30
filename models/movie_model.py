@@ -2,20 +2,13 @@ from sqlalchemy import (
     Column,
     Integer, 
     String, 
-    ForeignKey, 
     Float, 
     Table,
-    Boolean
+    ForeignKey
 )
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, Session
+
 from database import Base
-
-class User(Base):
-    __tablename__ = 'users'
-
-    username = Column(String, primary_key=True, index=True)
-    hashed_password = Column(String, nullable=False)
-    is_admin = Column(Boolean, nullable=False)
 
 movie_genre_association = Table(
     'movie_genre',
@@ -36,12 +29,9 @@ class Movie(Base):
         "Genre",
         secondary=movie_genre_association
     )
-    
+
 class Genre(Base):
     __tablename__ = 'genres'
 
-    # genre_id = Column(Integer, primary_key=True, index=True)
     genre = Column(String, primary_key=True)
 
-    def __repr__(self):
-        return self.genre

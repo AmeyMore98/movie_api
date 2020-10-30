@@ -5,20 +5,20 @@ from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import JWTError
 
-import crud
-import models
 from schemas import (
     movie_schema,
     user_schema,
     token_schema
 )
-from database import SessionLocal, engine
+from database import SessionLocal, engine, Base
 from services import (
     auth_service, 
     jwt_service,
+    MovieHandler,
+    UserHandler
 )
 
-models.Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
@@ -44,16 +44,15 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
         if username is None:
             raise credentials_exception
         token_data = token_schema.TokenData(username=username)
-    except JWTError as e:
-        print(e)
+    except JWTError:
         raise credentials_exception
-    user = crud.get_user(db, username=token_data.username)
+    user = UserHandler.get_user(db, username=token_data.username)
     if user is None:
         raise credentials_exception
     return user        
 
 # Movie endpoints
-@app.post("/movies/", response_model=movie_schema.Movie)
+@app.post("/movies/", status_code=201, response_model=movie_schema.Movie)
 def create_movie(
     movie: movie_schema.MovieCreate, 
     db: Session = Depends(get_db),
@@ -63,12 +62,44 @@ def create_movie(
     """
     if not user.is_admin:
         raise HTTPException(status_code=403, detail="Operation not permitted")
-    return crud.create_movie(db, movie=movie)
+    return MovieHandler.create_movie(db, movie=movie)
 
 @app.get("/movies/", response_model=List[movie_schema.Movie])
 def get_movies(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    movies = crud.get_movies(db, skip=skip, limit=limit)
+    """List all available movies.
+    """
+    movies = MovieHandler.get_movies(db, skip=skip, limit=limit)
     return movies
+
+@app.get("/movies/{movie_id}", response_model=movie_schema.Movie)
+def read_movie(movie_id: int, db: Session = Depends(get_db)):
+    movie = MovieHandler.get_movie(db, movie_id)
+    if movie is None:
+        raise HTTPException(status_code=404, detail="Resource not found")
+    return movie
+
+@app.put("/movies/{movie_id}", response_model=movie_schema.Movie)
+def update_movie(
+    movie_id: int, 
+    movie: movie_schema.MovieUpdate,
+    db: Session = Depends(get_db),
+    user: user_schema.User = Depends(get_current_user)
+):
+    """Updates an existing Movie.
+    """
+    if not user.is_admin:
+        raise HTTPException(status_code=403, detail="Operation not permitted")
+    return MovieHandler.update_movie(db, movie=movie, movie_id=movie_id)
+
+@app.delete("/movies/{movie_id}", status_code=204)
+def delete_movie(
+    movie_id: int,
+    db: Session = Depends(get_db),
+    user: user_schema.User = Depends(get_current_user)
+):
+    if not user.is_admin:
+        raise HTTPException(status_code=403, detail="Operation not permitted")
+    return MovieHandler.delete_movie(db, movie_id=movie_id)
 
 
 # Authentication endpoints

@@ -13,6 +13,9 @@ class MovieBase(BaseModel):
 class MovieCreate(MovieBase):
     genre: List[str]
 
+class MovieUpdate(MovieCreate):
+    pass
+
 class Movie(MovieBase):
     movie_id: int
     genre: List[genre_schema.Genre]

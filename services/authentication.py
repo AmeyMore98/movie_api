@@ -1,7 +1,7 @@
 import bcrypt
 from passlib.context import CryptContext
 
-import crud
+from services.user_handler import UserHandler
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -17,7 +17,7 @@ class AuthService:
         return pwd_context.hash(password)
 
     def authenticate_user(self, db, username: str, password: str):
-        user = crud.get_user(db, username)
+        user = UserHandler.get_user(db, username)
         if not user:
             return False
         if not self.verify_password(password, user.hashed_password):
