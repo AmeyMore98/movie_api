@@ -1,6 +1,6 @@
-from typing import List
+from typing import List, Optional
 
-from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi import Depends, FastAPI, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import JWTError
@@ -17,6 +17,7 @@ from services import (
     MovieHandler,
     UserHandler
 )
+import constants
 
 Base.metadata.create_all(bind=engine)
 
@@ -35,7 +36,7 @@ def get_db():
 def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
+        detail=constants.CREDENTIALS_NOT_VALID,
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
@@ -61,21 +62,41 @@ def create_movie(
     """Creates a new Movie.
     """
     if not user.is_admin:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Operation not permitted")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=constants.OPERATION_NOT_PERMITTED)
     return MovieHandler.create_movie(db, movie=movie)
 
 @app.get("/movies/", response_model=List[movie_schema.Movie])
-def get_movies(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    """List all available movies.
+def get_movies(
+    name: Optional[str] = None,
+    director: Optional[str] = None,
+    popularity: Optional[str] = Query(None, regex=constants.POPULARITY_QUERY_REGEX),
+    imdb_score: Optional[str] = Query(None, regex=constants.IMDB_SCORE_QUERY_REGEX),
+    skip: int = 0, 
+    limit: int = 100, 
+    db: Session = Depends(get_db)
+):
+    """List/Filter/Paginate all available movies. 
     """
-    movies = MovieHandler.get_movies(db, skip=skip, limit=limit)
+    query_dict = {}
+    if name:
+        query_dict['name'] = name
+    if director:
+        query_dict['director'] = director
+    if popularity:
+        opearator, val = popularity.split(':')
+        query_dict['popularity__'+opearator] = float(val)
+    if imdb_score:
+        opearator, val = imdb_score.split(':')
+        query_dict['imdb_score__'+opearator] = float(val)
+
+    movies = MovieHandler.get_movies(db, query_dict, skip=skip, limit=limit)
     return movies
 
 @app.get("/movies/{movie_id}", response_model=movie_schema.Movie)
 def read_movie(movie_id: int, db: Session = Depends(get_db)):
     movie = MovieHandler.get_movie(db, movie_id)
     if movie is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Resource not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=constants.RESOURCE_NOT_FOUND)
     return movie
 
 @app.put("/movies/{movie_id}", response_model=movie_schema.Movie)
@@ -88,7 +109,7 @@ def update_movie(
     """Updates an existing Movie.
     """
     if not user.is_admin:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Operation not permitted")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=constants.OPERATION_NOT_PERMITTED)
     return MovieHandler.update_movie(db, movie=movie, movie_id=movie_id)
 
 @app.delete("/movies/{movie_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -98,7 +119,7 @@ def delete_movie(
     user: user_schema.User = Depends(get_current_user)
 ):
     if not user.is_admin:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Operation not permitted")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=constants.OPERATION_NOT_PERMITTED)
     return MovieHandler.delete_movie(db, movie_id=movie_id)
 
 
@@ -112,7 +133,7 @@ def login_for_access_token(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail='Incorrect username or password',
+            detail=constants.INCORRECT_CREDENTIALS,
             headers={"WWW-Authenticate": "Bearer"}            
         )
     access_token = jwt_service.create_access_token(
