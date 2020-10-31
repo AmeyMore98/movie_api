@@ -25,7 +25,7 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 # Dependency
 def get_db():
@@ -142,8 +142,12 @@ def create_user(
             status_code=status.HTTP_403_FORBIDDEN, 
             detail=constants.OPERATION_NOT_PERMITTED
         )
-    new_user.password = auth_service.get_password_hash(new_user.password)
-    return UserHandler.create_user(db, user=new_user)
+    # new_user.password = auth_service.get_password_hash(new_user.password)
+    user_in_db = user_schema.UserInDb(
+        **new_user.dict(), 
+        hashed_password=auth_service.get_password_hash(new_user.password)
+    )
+    return UserHandler.create_user(db, user=user_in_db)
 
 @app.get("/users/", response_model=List[user_schema.User])
 def get_users(
@@ -174,8 +178,12 @@ def update_user(
     """
     if not user.is_admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=constants.OPERATION_NOT_PERMITTED)
-    new_user.password = auth_service.get_password_hash(new_user.password)
-    return UserHandler.update_user(db, user=new_user, username=username)
+    # new_user.password = auth_service.get_password_hash(new_user.password)
+    user_in_db = user_schema.UserInDb(
+        **new_user.dict(), 
+        hashed_password=auth_service.get_password_hash(new_user.password)
+    )
+    return UserHandler.update_user(db, user=user_in_db, username=username)
 
 @app.delete("/users/{username}", status_code=status.HTTP_200_OK)
 def delete_user(
@@ -190,7 +198,7 @@ def delete_user(
 
 
 # Authentication endpoints
-@app.post("/token", response_model=token_schema.Token)
+@app.post("/login", response_model=token_schema.Token)
 def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(), 
     db: Session = Depends(get_db)
@@ -207,4 +215,3 @@ def login_for_access_token(
     )
 
     return {"access_token": access_token, "token_type": "bearer"}
-

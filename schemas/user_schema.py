@@ -1,7 +1,7 @@
 from pydantic import BaseModel, EmailStr
 
 class UserBase(BaseModel):
-    username: str
+    username: EmailStr
     is_admin: bool
 
 class UserCreate(UserBase):
@@ -9,6 +9,9 @@ class UserCreate(UserBase):
 
 class UserUpdate(UserCreate):
     pass
+
+class UserInDb(UserBase):
+    hashed_password: str
 
 class User(UserBase):
     

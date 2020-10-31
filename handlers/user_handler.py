@@ -7,16 +7,8 @@ from schemas import user_schema
 class UserHandler:
 
     @staticmethod
-    def get_user(db, username: str):
-        return db.query(user_model.User).filter_by(username=username).first()
-
-    @staticmethod
     def create_user(db: Session, user: user_schema.UserCreate):
-        user = user.dict()
-        user['hashed_password'] = user['password']
-        del user['password']
-        print(user)
-        db_user = user_model.User(**user)
+        db_user = user_model.User(**user.dict())
         db.add(db_user)
         db.commit()
         db.refresh(db_user)
@@ -32,10 +24,7 @@ class UserHandler:
         if not existing_user:
             raise HTTPException(status_code=404, detail="Resource not found")
         
-        user = user.dict()
-        user['hashed_password'] = user['password']
-        del user['password']
-        for key, value in user.items():
+        for key, value in user.dict().items():
             setattr(existing_user, key, value)
 
         db.add(existing_user)
@@ -54,3 +43,5 @@ class UserHandler:
             db.delete(user)
             db.commit()
             return 
+        
+        return
