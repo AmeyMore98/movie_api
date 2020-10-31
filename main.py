@@ -11,7 +11,7 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="Imdb API",
-    description="Movie API similar to Imdb",
+    description="A movie API similar to Imdb",
     version="0.1.0"
 )
 app.include_router(users.router)
