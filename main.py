@@ -52,7 +52,7 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
     return user        
 
 # Movie endpoints
-@app.post("/movies/", status_code=201, response_model=movie_schema.Movie)
+@app.post("/movies/", status_code=status.HTTP_201_CREATED, response_model=movie_schema.Movie)
 def create_movie(
     movie: movie_schema.MovieCreate, 
     db: Session = Depends(get_db),
@@ -61,7 +61,7 @@ def create_movie(
     """Creates a new Movie.
     """
     if not user.is_admin:
-        raise HTTPException(status_code=403, detail="Operation not permitted")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Operation not permitted")
     return MovieHandler.create_movie(db, movie=movie)
 
 @app.get("/movies/", response_model=List[movie_schema.Movie])
@@ -75,7 +75,7 @@ def get_movies(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
 def read_movie(movie_id: int, db: Session = Depends(get_db)):
     movie = MovieHandler.get_movie(db, movie_id)
     if movie is None:
-        raise HTTPException(status_code=404, detail="Resource not found")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Resource not found")
     return movie
 
 @app.put("/movies/{movie_id}", response_model=movie_schema.Movie)
@@ -88,17 +88,17 @@ def update_movie(
     """Updates an existing Movie.
     """
     if not user.is_admin:
-        raise HTTPException(status_code=403, detail="Operation not permitted")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Operation not permitted")
     return MovieHandler.update_movie(db, movie=movie, movie_id=movie_id)
 
-@app.delete("/movies/{movie_id}", status_code=204)
+@app.delete("/movies/{movie_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_movie(
     movie_id: int,
     db: Session = Depends(get_db),
     user: user_schema.User = Depends(get_current_user)
 ):
     if not user.is_admin:
-        raise HTTPException(status_code=403, detail="Operation not permitted")
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Operation not permitted")
     return MovieHandler.delete_movie(db, movie_id=movie_id)
 
 
