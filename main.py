@@ -10,7 +10,7 @@ from schemas import (
     user_schema,
     token_schema
 )
-from database import SessionLocal, engine, Base
+from db.database import SessionLocal, engine, Base
 from services import (
     auth_service, 
     jwt_service,

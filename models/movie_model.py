@@ -8,7 +8,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship, Session
 
-from database import Base
+from db.database import Base
 
 movie_genre_association = Table(
     'movie_genre',

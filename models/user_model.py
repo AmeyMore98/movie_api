@@ -4,7 +4,7 @@ from sqlalchemy import (
     Boolean
 )
 
-from database import Base
+from db.database import Base
 
 class User(Base):
     __tablename__ = 'users'
