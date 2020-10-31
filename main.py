@@ -13,7 +13,9 @@ from schemas import (
 from db.database import SessionLocal, engine, Base
 from services import (
     auth_service, 
-    jwt_service,
+    jwt_service
+)
+from handlers import (
     MovieHandler,
     UserHandler
 )
@@ -124,6 +126,67 @@ def delete_movie(
     if not user.is_admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=constants.OPERATION_NOT_PERMITTED)
     return MovieHandler.delete_movie(db, movie_id=movie_id)
+
+
+# User endpoints
+@app.post("/users/", status_code=status.HTTP_201_CREATED, response_model=user_schema.User)
+def create_user(
+    new_user: user_schema.UserCreate, 
+    db: Session = Depends(get_db),
+    user: user_schema.User = Depends(get_current_user)
+):
+    """Creates a new User.
+    """
+    if not user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail=constants.OPERATION_NOT_PERMITTED
+        )
+    new_user.password = auth_service.get_password_hash(new_user.password)
+    return UserHandler.create_user(db, user=new_user)
+
+@app.get("/users/", response_model=List[user_schema.User])
+def get_users(
+    skip: int = 0, 
+    limit: int = 100, 
+    db: Session = Depends(get_db)
+):
+    """List all available users. 
+    """
+    users = UserHandler.get_users(db, skip=skip, limit=limit)
+    return users
+
+@app.get("/users/{username}", response_model=user_schema.User)
+def read_user(username: str, db: Session = Depends(get_db)):
+    user = UserHandler.get_user(db, username)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=constants.RESOURCE_NOT_FOUND)
+    return user
+
+@app.put("/users/{username}", response_model=user_schema.User)
+def update_user(
+    username: str, 
+    new_user: user_schema.UserUpdate,
+    db: Session = Depends(get_db),
+    user: user_schema.User = Depends(get_current_user)
+):
+    """Updates an existing User.
+    """
+    if not user.is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=constants.OPERATION_NOT_PERMITTED)
+    new_user.password = auth_service.get_password_hash(new_user.password)
+    return UserHandler.update_user(db, user=new_user, username=username)
+
+@app.delete("/users/{username}", status_code=status.HTTP_200_OK)
+def delete_user(
+    username: str,
+    db: Session = Depends(get_db),
+    user: user_schema.User = Depends(get_current_user)
+):
+    if not user.is_admin:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=constants.OPERATION_NOT_PERMITTED)
+    UserHandler.delete_user(db, username=username)
+    return {constants.MESSAGE: constants.RESOURCE_DELETED}
 
 
 # Authentication endpoints

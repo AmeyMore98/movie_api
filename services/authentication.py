@@ -1,7 +1,6 @@
-import bcrypt
 from passlib.context import CryptContext
 
-from services.user_handler import UserHandler
+from handlers.user_handler import UserHandler
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 

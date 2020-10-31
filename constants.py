@@ -8,3 +8,7 @@ RESOURCE_NOT_FOUND = "Resource not found"
 OPERATION_NOT_PERMITTED = "Operation not permitted"
 INCORRECT_CREDENTIALS = "Incorrect username or password"
 CREDENTIALS_NOT_VALID = "Could not validate credentials"
+RESOURCE_DELETED = "Resource deleted"
+
+# Keys
+MESSAGE = "message"

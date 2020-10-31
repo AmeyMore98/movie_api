@@ -1,13 +1,16 @@
 from pydantic import BaseModel, EmailStr
 
 class UserBase(BaseModel):
-    username: EmailStr
+    username: str
+    is_admin: bool
 
 class UserCreate(UserBase):
     password: str
 
-class User(UserBase):
-    is_admin: bool
+class UserUpdate(UserCreate):
+    pass
 
+class User(UserBase):
+    
     class Config:
         orm_mode = True
