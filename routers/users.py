@@ -1,5 +1,6 @@
 from typing import List
 
+from pydantic import EmailStr
 from fastapi import APIRouter
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -43,23 +44,38 @@ def create_user(
 def get_users(
     skip: int = 0, 
     limit: int = 100, 
-    db: Session = Depends(dependancies.get_db)
+    db: Session = Depends(dependancies.get_db),
+    user: user_schema.User = Depends(dependancies.get_current_user)
 ):
     """List all available users. 
     """
+    if not user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail=constants.OPERATION_NOT_PERMITTED
+        )
     users = UserHandler.get_users(db, skip=skip, limit=limit)
     return users
 
 @router.get("/users/{username}", response_model=user_schema.User)
-def read_user(username: str, db: Session = Depends(dependancies.get_db)):
-    user = UserHandler.get_user(db, username)
-    if user is None:
+def read_user(
+    username: EmailStr, 
+    db: Session = Depends(dependancies.get_db),
+    user: user_schema.User = Depends(dependancies.get_current_user)
+):
+    if not user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, 
+            detail=constants.OPERATION_NOT_PERMITTED
+        )
+    db_user = UserHandler.get_user(db, username)
+    if db_user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=constants.RESOURCE_NOT_FOUND)
-    return user
+    return db_user
 
 @router.put("/users/{username}", response_model=user_schema.User)
 def update_user(
-    username: str, 
+    username: EmailStr, 
     new_user: user_schema.UserUpdate,
     db: Session = Depends(dependancies.get_db),
     user: user_schema.User = Depends(dependancies.get_current_user)
@@ -77,7 +93,7 @@ def update_user(
 
 @router.delete("/users/{username}", status_code=status.HTTP_200_OK)
 def delete_user(
-    username: str,
+    username: EmailStr,
     db: Session = Depends(dependancies.get_db),
     user: user_schema.User = Depends(dependancies.get_current_user)
 ):
@@ -85,4 +101,3 @@ def delete_user(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=constants.OPERATION_NOT_PERMITTED)
     UserHandler.delete_user(db, username=username)
     return {constants.MESSAGE: constants.RESOURCE_DELETED}
-
