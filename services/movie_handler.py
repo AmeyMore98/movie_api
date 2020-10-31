@@ -48,11 +48,10 @@ class MovieHandler:
         return existing_movie
 
     @staticmethod
-    def get_movies(db: Session, query_dict, skip: int = 0, limit: int = 100):
-        filters = []
-        if query_dict:
-            filters = utils.get_filter_by_args(movie_model.Movie, query_dict)
-        return db.query(movie_model.Movie).filter(*filters).offset(skip).limit(limit).all()
+    def get_movies(db: Session, filter_args: dict = {}, sort_args: list = [], skip: int = 0, limit: int = 100):
+        filters = utils.get_filter_by_args(movie_model.Movie, filter_args)
+        sorters = utils.get_sorter_by_args(movie_model.Movie, sort_args)
+        return db.query(movie_model.Movie).filter(*filters).order_by(*sorters).offset(skip).limit(limit).all()
 
     @staticmethod
     def delete_movie(db: Session, movie_id: int):

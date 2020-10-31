@@ -73,23 +73,26 @@ def get_movies(
     imdb_score: Optional[str] = Query(None, regex=constants.IMDB_SCORE_QUERY_REGEX),
     skip: int = 0, 
     limit: int = 100, 
+    sort: Optional[str] = Query('', regex=constants.SORT_REGEX),
     db: Session = Depends(get_db)
 ):
-    """List/Filter/Paginate all available movies. 
+    """List/Filter/Paginate/Sort all available movies. 
     """
-    query_dict = {}
+    filter_args = {}
     if name:
-        query_dict['name'] = name
+        filter_args['name'] = name
     if director:
-        query_dict['director'] = director
+        filter_args['director'] = director
     if popularity:
         opearator, val = popularity.split(':')
-        query_dict['popularity__'+opearator] = float(val)
+        filter_args['popularity__'+opearator] = float(val)
     if imdb_score:
         opearator, val = imdb_score.split(':')
-        query_dict['imdb_score__'+opearator] = float(val)
+        filter_args['imdb_score__'+opearator] = float(val)
 
-    movies = MovieHandler.get_movies(db, query_dict, skip=skip, limit=limit)
+    sort_args = sort.split(',') if sort else []
+
+    movies = MovieHandler.get_movies(db, filter_args, sort_args, skip=skip, limit=limit)
     return movies
 
 @app.get("/movies/{movie_id}", response_model=movie_schema.Movie)

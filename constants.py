@@ -1,6 +1,7 @@
 # Regex
-POPULARITY_QUERY_REGEX = "^(gt|lt|gte|lte|ne):([0-9]+|([0-9]+.[0-9]+))$"
-IMDB_SCORE_QUERY_REGEX = "^(gt|lt|gte|lte|ne):([0-9]{1}|([0-9]{1}.[0-9]+))$"
+POPULARITY_QUERY_REGEX = "^(gt|lt|gte|lte|ne):(\d+|(\d+.\d+))$"
+IMDB_SCORE_QUERY_REGEX = "^(gt|lt|gte|lte|ne):(\d{1}|(\d{1}.\d+))$"
+SORT_REGEX = "^(-*((popularity)|(imdb_score)|(name)|(director)),)*-*((popularity)|(imdb_score)|(name)|(director))$"
 
 # Messages
 RESOURCE_NOT_FOUND = "Resource not found"
