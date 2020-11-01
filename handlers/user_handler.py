@@ -5,6 +5,8 @@ from models import user_model
 from schemas import user_schema
 
 class UserHandler:
+    """Handles all user related CRUD operations.
+    """
 
     @staticmethod
     def create_user(db: Session, user: user_schema.UserCreate):

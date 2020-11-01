@@ -23,7 +23,41 @@ def create_movie(
     db: Session = Depends(dependancies.get_db),
     user: user_schema.User = Depends(dependancies.get_current_user)
 ):
-    """Creates a new Movie.
+    """Creates new movie. Only accessible to Admin.
+
+    - **HEADERS**:
+        ```
+        {
+            "Authorization": "Bearer <sample token>"
+        }
+        ```
+    - **REQUEST**:
+        ```
+        {
+            "name": "The Two Towers",
+            "director": "Peter Jackson",
+            "popularity": 96.0,
+            "imdb_score": 9.6,
+            "genre": [
+                "Adventure"
+            ]
+        }
+        ```
+    - **RESPONSE**:
+        ```
+        {
+            "name": "The Two Towers",
+            "director": "Peter Jackson",
+            "popularity": 96.0,
+            "imdb_score": 9.6,
+            "movie_id": 249,
+            "genre": [
+                {
+                    "genre": "Adventure"
+                }
+            ]
+        }
+        ```
     """
     if not user.is_admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=constants.OPERATION_NOT_PERMITTED)
@@ -40,7 +74,61 @@ def get_movies(
     sort: Optional[str] = Query('', regex=constants.SORT_REGEX),
     db: Session = Depends(dependancies.get_db)
 ):
-    """List/Filter/Paginate/Sort all available movies. 
+    """List/Search/Filter/Sort all movies. 
+
+    **Eg:**
+    1. Search by name: ```/movies?name=star```
+    2. Search by director: ```/movies?director=peter```
+    3. Get movies with imdb_score less than 8.0: ```/movies?imdb_score=lt:8.0```
+    4. Get movies with popularity between 60 to 80: ```/movies?popularity=gte:60&popularity=lte:80```
+    5. Sort by director: ```/movies?sort=director```
+    6. Sort by name(descending): ```/movies?sort=-name```
+    7. Get movie with highest imdb_score: ```/movies?sort=-imdb_score&limit=1```
+    8. Get movie with 2nd highest popularity: ```/movies?sort=-popularity&skip=1&limit=1```
+    9. And other similar operations...<br>
+
+    **Note**: Search/Filter/Sort currently not supported on `genre`.
+
+    - **REQUEST**:
+        ```
+        {}
+        ```
+    - **RESPONSE**:
+        ```
+        [
+            {
+                "name": "The Godfather",
+                "director": "Francis Ford Coppola",
+                "popularity": 92.0,
+                "imdb_score": 9.2,
+                "movie_id": 11,
+                "genre": [
+                    {
+                        "genre": "Crime"
+                    },
+                    {
+                        "genre": "Drama"
+                    }
+                ]
+            },
+            ....
+            {
+                "name": "Il buono, il brutto, il cattivo.",
+                "director": "Sergio Leone",
+                "popularity": 90.0,
+                "imdb_score": 9.0,
+                "movie_id": 43,
+                "genre": [
+                    {
+                        "genre": "Adventure"
+                    },
+                    {
+                        "genre": "Western"
+                    }
+                ]
+            },
+        ]
+        ```
     """
     filter_args = {}
     if name:
@@ -61,6 +149,28 @@ def get_movies(
 
 @router.get("/movies/{movie_id}", response_model=movie_schema.Movie)
 def read_movie(movie_id: int, db: Session = Depends(dependancies.get_db)):
+    """Read a movie.
+
+    - **REQUEST**:
+        ```
+        {}
+        ```
+    - **RESPONSE**:
+        ```
+        {
+            "name": "The Two Towers",
+            "director": "Peter Jackson",
+            "popularity": 96.0,
+            "imdb_score": 9.6,
+            "movie_id": 249,
+            "genre": [
+                {
+                    "genre": "Adventure"
+                }
+            ]
+        }
+        ```
+    """ 
     movie = MovieHandler.get_movie(db, movie_id)
     if movie is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=constants.RESOURCE_NOT_FOUND)
@@ -73,7 +183,45 @@ def update_movie(
     db: Session = Depends(dependancies.get_db),
     user: user_schema.User = Depends(dependancies.get_current_user)
 ):
-    """Updates an existing Movie.
+    """Update a movie. Only accessible to Admin.
+
+    - **HEADERS**:
+        ```
+        {
+            "Authorization": "Bearer <sample token>"
+        }
+        ```
+    - **REQUEST**:
+        ```
+        {
+            "name": "The Two Towers",
+            "director": "Peter Jackson",
+            "popularity": 96.0,
+            "imdb_score": 9.6,
+            "genre": [
+                "Adventure",
+                "Fiction"
+            ]
+        }
+        ```
+    - **RESPONSE**:
+        ```
+        {
+            "name": "The Two Towers",
+            "director": "Peter Jackson",
+            "popularity": 96.0,
+            "imdb_score": 9.6,
+            "movie_id": 249,
+            "genre": [
+                {
+                    "genre": "Adventure"
+                },
+                {
+                    "genre: "Fiction"
+                }
+            ]
+        }
+        ```
     """
     if not user.is_admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=constants.OPERATION_NOT_PERMITTED)
@@ -85,6 +233,25 @@ def delete_movie(
     db: Session = Depends(dependancies.get_db),
     user: user_schema.User = Depends(dependancies.get_current_user)
 ):
+    """Delete a movie. Only accessible to Admin.
+
+    - **HEADERS**:
+        ```
+        {
+            "Authorization": "Bearer <sample token>"
+        }
+        ```
+    - **REQUEST**:
+        ```
+        {}
+        ```
+    - **RESPONSE**:
+        ```
+        {
+            "detail": "Resource deleted"
+        }
+        ```
+    """
     if not user.is_admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=constants.OPERATION_NOT_PERMITTED)
     MovieHandler.delete_movie(db, movie_id=movie_id)

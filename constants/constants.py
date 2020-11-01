@@ -1,6 +1,6 @@
 # Regex
-POPULARITY_QUERY_REGEX = "^(gt|lt|gte|lte|ne):(\d+|(\d+.\d+))$"
-IMDB_SCORE_QUERY_REGEX = "^(gt|lt|gte|lte|ne):(\d{1}|(\d{1}.\d+))$"
+POPULARITY_QUERY_REGEX = "^(gt|lt|gte|lte|ne|eq):(\d+|(\d+.\d+))$"
+IMDB_SCORE_QUERY_REGEX = "^(gt|lt|gte|lte|ne|eq):(\d{1}|(\d{1}.\d+))$"
 SORT_REGEX = "^(-*((popularity)|(imdb_score)|(name)|(director)),)*-*((popularity)|(imdb_score)|(name)|(director))$"
 
 # Messages

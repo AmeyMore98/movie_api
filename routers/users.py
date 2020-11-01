@@ -20,7 +20,29 @@ def create_user(
     db: Session = Depends(dependancies.get_db),
     user: user_schema.User = Depends(dependancies.get_current_user)
 ):
-    """Creates a new User.
+    """Creates new user. Only accessible to Admin
+
+    - **HEADERS**:
+        ```
+        {
+            "Authorization": "Bearer <sample token>"
+        }
+        ```
+    - **REQUEST**:
+        ```
+        {
+            "username": "testuser@gmail.com",
+            "password": "test",
+            "is_admin": false
+        }
+        ```
+    - **RESPONSE**:
+        ```
+        {
+            "username": "testuser@gmail.com",
+            "is_admin": false
+        }
+        ```
     """
     if not user.is_admin:
         raise HTTPException(
@@ -41,8 +63,28 @@ def get_users(
     db: Session = Depends(dependancies.get_db),
     user: user_schema.User = Depends(dependancies.get_current_user)
 ):
-    """List all available users. 
-    """
+    """List all users. Only accessible to Admin
+
+    - **HEADERS**:
+        ```
+        {
+            "Authorization": "Bearer <sample token>"
+        }
+        ```
+    - **REQUEST**:
+        ```
+        {}
+        ```
+    - **RESPONSE**:
+        ```
+        [
+            {
+                "username": "testuser@gmail.com",
+                "is_admin": false
+            }
+        ]
+        ```
+    """    
     if not user.is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
@@ -57,6 +99,26 @@ def read_user(
     db: Session = Depends(dependancies.get_db),
     user: user_schema.User = Depends(dependancies.get_current_user)
 ):
+    """Get user. Only accessible to Admin
+
+    - **HEADERS**:
+        ```
+        {
+            "Authorization": "Bearer <sample token>"
+        }
+        ```
+    - **REQUEST**:
+        ```
+        {}
+        ```
+    - **RESPONSE**:
+        ```
+        {
+            "username": "testuser@gmail.com",
+            "is_admin": false
+        }
+        ```
+    """  
     if not user.is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, 
@@ -74,8 +136,30 @@ def update_user(
     db: Session = Depends(dependancies.get_db),
     user: user_schema.User = Depends(dependancies.get_current_user)
 ):
-    """Updates an existing User.
-    """
+    """Updates a user. Only accessible to Admin
+
+    - **HEADERS**:
+        ```
+        {
+            "Authorization": "Bearer <sample token>"
+        }
+        ```
+    - **REQUEST**:
+        ```
+        {
+            "username": "testuser@gmail.com",
+            "password": "testuser",
+            "is_admin": true
+        }
+        ```
+    - **RESPONSE**:
+        ```
+        {
+            "username": "testuser@gmail.com",
+            "is_admin": true
+        }
+        ```
+    """  
     if not user.is_admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=constants.OPERATION_NOT_PERMITTED)
     # new_user.password = auth_service.get_password_hash(new_user.password)
@@ -91,6 +175,25 @@ def delete_user(
     db: Session = Depends(dependancies.get_db),
     user: user_schema.User = Depends(dependancies.get_current_user)
 ):
+    """Deletes a user. Only accessible to Admin
+
+    - **HEADERS**:
+        ```
+        {
+            "Authorization": "Bearer <sample token>"
+        }
+        ```
+    - **REQUEST**:
+        ```
+        {}
+        ```
+    - **RESPONSE**:
+        ```
+        {
+            "detail": "Resource deleted"
+        }
+        ```
+    """ 
     if not user.is_admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=constants.OPERATION_NOT_PERMITTED)
     UserHandler.delete_user(db, username=username)

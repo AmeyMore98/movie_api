@@ -6,7 +6,9 @@ from schemas import movie_schema
 from services import utils
 
 class MovieHandler:
-
+    """Handles all Movie related CRUD operations
+    """
+    
     @staticmethod
     def get_movie(db: Session, movie_id: int):
         return db.query(movie_model.Movie).get(movie_id)
@@ -15,7 +17,10 @@ class MovieHandler:
     def create_movie(db: Session, movie: movie_schema.MovieCreate):
         movie = movie.dict()
         db_movie = movie_model.Movie(**movie)
-        db_movie.genre = list(map(lambda x: utils.get_or_create(db, movie_model.Genre, genre=x.strip()), movie['genre']))
+        db_movie.genre = list(map(
+            lambda x: utils.get_or_create(db, movie_model.Genre, genre=x.strip()), 
+            movie['genre']
+        ))
         db.add(db_movie)
         db.commit()
         db.refresh(db_movie)
