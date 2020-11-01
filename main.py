@@ -18,6 +18,6 @@ app = FastAPI(
 )
 
 # Setup routes
-app.include_router(users.router)
-app.include_router(movies.router)
-app.include_router(auth.router)
+app.include_router(users.router, tags=['Users'])
+app.include_router(movies.router, tags=['Movies'])
+app.include_router(auth.router, tags=['Auth'])
