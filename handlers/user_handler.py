@@ -1,4 +1,4 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
 from models import user_model
@@ -8,6 +8,11 @@ class UserHandler:
 
     @staticmethod
     def create_user(db: Session, user: user_schema.UserCreate):
+        if UserHandler.get_user(db, user.username):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, 
+                detail="Resource already exisits"
+            )
         db_user = user_model.User(**user.dict())
         db.add(db_user)
         db.commit()
