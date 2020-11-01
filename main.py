@@ -12,7 +12,7 @@ Base.metadata.create_all(bind=engine)
 
 # Init App
 app = FastAPI(
-    title="Imdb API",
+    title="Movie API",
     description="A movie API similar to Imdb",
     version="0.1.0"
 )
