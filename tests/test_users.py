@@ -141,4 +141,4 @@ def test_delete_user():
     response_data = response.json()
     
     assert response.status_code == 200
-    assert response_data['message'] == "Resource deleted"
+    assert response_data['detail'] == "Resource deleted"

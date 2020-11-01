@@ -94,4 +94,4 @@ def delete_user(
     if not user.is_admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=constants.OPERATION_NOT_PERMITTED)
     UserHandler.delete_user(db, username=username)
-    return {constants.MESSAGE: constants.RESOURCE_DELETED}
+    return {constants.DETAIL: constants.RESOURCE_DELETED}

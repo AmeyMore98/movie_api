@@ -9,6 +9,7 @@ OPERATION_NOT_PERMITTED = "Operation not permitted"
 INCORRECT_CREDENTIALS = "Incorrect username or password"
 CREDENTIALS_NOT_VALID = "Could not validate credentials"
 RESOURCE_DELETED = "Resource deleted"
-
+INVALID_TOKEN = "Invalid token"
+TOKEN_EXPIRED = "Token expired"
 # Keys
-MESSAGE = "message"
+DETAIL = "detail"
