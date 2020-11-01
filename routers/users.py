@@ -5,16 +5,10 @@ from fastapi import APIRouter
 from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from schemas import (
-    user_schema,
-)
-from services import (
-    auth_service, 
-)
-from handlers import (
-    UserHandler
-)
-import constants
+from schemas import user_schema
+from services import auth_service
+from handlers import UserHandler
+from constants import constants
 from routers import dependancies
 
 router = APIRouter()

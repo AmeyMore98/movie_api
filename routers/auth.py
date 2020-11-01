@@ -7,7 +7,7 @@ from services import (
     auth_service, 
     jwt_service
 )
-import constants
+from constants import constants
 from routers import (
     dependancies
 )

@@ -12,7 +12,7 @@ from handlers import (
     MovieHandler
 )
 from routers import dependancies
-import constants
+from constants import constants
 
 router = APIRouter()
 

@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordBearer
 
 from db.database import SessionLocal
 from sqlalchemy.orm import Session
-import constants
+from constants import constants
 from schemas import token_schema
 from services import jwt_service
 from handlers import UserHandler
