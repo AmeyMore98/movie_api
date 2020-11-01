@@ -35,5 +35,8 @@ def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_
         raise credentials_exception
     user = UserHandler.get_user(db, username=token_data.username)
     if user is None:
-        raise credentials_exception
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=constants.INCORRECT_CREDENTIALS
+        )
     return user        
