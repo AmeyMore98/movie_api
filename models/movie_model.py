@@ -6,7 +6,7 @@ from sqlalchemy import (
     Table,
     ForeignKey
 )
-from sqlalchemy.orm import relationship, Session
+from sqlalchemy.orm import relationship
 
 from db.database import Base
 
@@ -34,4 +34,3 @@ class Genre(Base):
     __tablename__ = 'genres'
 
     genre = Column(String, primary_key=True)
-

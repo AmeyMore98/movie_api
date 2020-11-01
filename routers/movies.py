@@ -17,7 +17,7 @@ import constants
 router = APIRouter()
 
 # Movie endpoints
-@router.post("/movies/", status_code=status.HTTP_201_CREATED, response_model=movie_schema.Movie)
+@router.post("/movies", status_code=status.HTTP_201_CREATED, response_model=movie_schema.Movie)
 def create_movie(
     movie: movie_schema.MovieCreate, 
     db: Session = Depends(dependancies.get_db),
@@ -29,7 +29,7 @@ def create_movie(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=constants.OPERATION_NOT_PERMITTED)
     return MovieHandler.create_movie(db, movie=movie)
 
-@router.get("/movies/", response_model=List[movie_schema.Movie])
+@router.get("/movies", response_model=List[movie_schema.Movie])
 def get_movies(
     name: Optional[str] = None,
     director: Optional[str] = None,
@@ -79,7 +79,7 @@ def update_movie(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=constants.OPERATION_NOT_PERMITTED)
     return MovieHandler.update_movie(db, movie=movie, movie_id=movie_id)
 
-@router.delete("/movies/{movie_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/movies/{movie_id}", status_code=status.HTTP_200_OK)
 def delete_movie(
     movie_id: int,
     db: Session = Depends(dependancies.get_db),
@@ -87,4 +87,5 @@ def delete_movie(
 ):
     if not user.is_admin:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail=constants.OPERATION_NOT_PERMITTED)
-    return MovieHandler.delete_movie(db, movie_id=movie_id)
+    MovieHandler.delete_movie(db, movie_id=movie_id)
+    return {constants.MESSAGE: constants.RESOURCE_DELETED}

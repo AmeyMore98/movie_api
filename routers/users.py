@@ -20,7 +20,7 @@ from routers import dependancies
 router = APIRouter()
 
 # User endpoints
-@router.post("/users/", status_code=status.HTTP_201_CREATED, response_model=user_schema.User)
+@router.post("/users", status_code=status.HTTP_201_CREATED, response_model=user_schema.User)
 def create_user(
     new_user: user_schema.UserCreate, 
     db: Session = Depends(dependancies.get_db),
@@ -40,7 +40,7 @@ def create_user(
     )
     return UserHandler.create_user(db, user=user_in_db)
 
-@router.get("/users/", response_model=List[user_schema.User])
+@router.get("/users", response_model=List[user_schema.User])
 def get_users(
     skip: int = 0, 
     limit: int = 100, 

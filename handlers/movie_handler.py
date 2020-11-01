@@ -59,4 +59,4 @@ class MovieHandler:
         if movie:
             db.delete(movie)
             db.commit()
-            return 
+            return
