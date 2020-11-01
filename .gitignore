@@ -1,4 +1,4 @@
 .vscode/*
 env/*
-imdb.db
+*.db
 **/__pycache__/*
