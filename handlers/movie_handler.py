@@ -37,12 +37,10 @@ class MovieHandler:
                 setattr(
                     existing_movie,
                     key, 
-                    list(
-                        map(
-                            lambda x: utils.get_or_create(db, movie_model.Genre, genre=x.strip()), 
-                            value
-                        )
-                    )
+                    list(map(
+                        lambda x: utils.get_or_create(db, movie_model.Genre, genre=x.strip()), 
+                        value
+                    ))
                 )
             else:
                 setattr(existing_movie, key, value)

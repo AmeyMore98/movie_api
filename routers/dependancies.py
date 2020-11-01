@@ -20,6 +20,8 @@ def get_db():
         db.close()
 
 def get_current_user(db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+    """Extracts current user for token.
+    """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail=constants.CREDENTIALS_NOT_VALID,
