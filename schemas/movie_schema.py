@@ -22,4 +22,3 @@ class Movie(MovieBase):
 
     class Config:
         orm_mode = True
-

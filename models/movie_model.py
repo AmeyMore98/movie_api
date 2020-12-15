@@ -1,14 +1,5 @@
-from sqlalchemy import (
-    Column,
-    Integer, 
-    String, 
-    Float, 
-    Table,
-    ForeignKey
-)
-from sqlalchemy.orm import relationship
-
-from db.database import Base
+from tortoise import fields, models
+from tortoise.contrib.pydantic import pydantic_model_creator
 
 movie_genre_association = Table(
     'movie_genre',
@@ -17,20 +8,17 @@ movie_genre_association = Table(
     Column('genre', String, ForeignKey("genres.genre"))
 )
 
-class Movie(Base):
-    __tablename__ = 'movies'
-
-    movie_id = Column(Integer, primary_key=True, index=True)
-    name = Column(String, nullable=False, index=True)
-    director = Column(String, nullable=False)
-    popularity = Column(Float, nullable=False)
-    imdb_score = Column(Float, nullable=False)
-    genre = relationship(
-        "Genre",
-        secondary=movie_genre_association
+class Movie(models.Model):
+    movie_id = fields.IntField(pk=True)
+    name = fields.CharField(null=False)
+    director = fields.CharField(null=False)
+    popularity = fields.CharField(null=False)
+    imdb_score = fields.CharField(null=False)
+    genre: fields.ManyToManyRelation["Genre"] = fields.ManyToManyField(
+        "models.movie_model.Movie", related_name='genres', through='movie_genre'
     )
 
 class Genre(Base):
     __tablename__ = 'genres'
 
-    genre = Column(String, primary_key=True)
+    genre = fields.CharField(pk=True)
